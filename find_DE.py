@@ -36,40 +36,11 @@ import re, os, sys, time
 from collections import Counter
 
 DELIMITER_zh = ["，", "；", "！", "？", ",", ";", "!", "?", "。"]
-pat_delimieter_zh = re.compile('([{}])'.format(''.join([d for d in DELIMITER_zh])))
+pat_delimiter_zh = re.compile('([{}])'.format(''.join([d for d in DELIMITER_zh])))
 
 DELIMITER_en = ["\s;\s", "\s.\s", "\s,\s", "\s!\s", "\s?\s"]
-pat_delimieter_en = re.compile("(\s;\s|\s\.\s|\s,\s|\s!\s|\s\?\s)")
+pat_delimiter_en = re.compile("(\s;\s|\s\.\s|\s,\s|\s!\s|\s\?\s)")
 
-# NPI_zh = [
-#     # any
-#     "任何",
-#
-#     # wh-indeterminates
-#     "什么", "谁", "哪儿", "哪里", "哪个", "怎么", "多少",
-#
-#     # minimizers
-#     # "半个人",
-#     # "一个人",
-#     # "一个子儿",
-#     # "半分钱",
-#     # "半毛钱",
-#     # "一分钱",
-#     # "一毛钱",
-#     # "一块钱",
-#     # "半毛钱",
-#     # "一句话",
-#     # "一个字",
-#     # "一点儿",
-#
-#     # neg-sensitive advs
-#     "从来", "丝毫",
-#
-#     # others
-#     "来得及", "像话",
-#     # "万万",
-#     "天高地厚", "挂齿", "介意"
-# ]
 
 from zh_NPIs import NPI_zh
 
@@ -79,26 +50,33 @@ WH_OP_zh = {"吗", "呢", "？", "?"}
 
 NPI_en = [
     # column 1 of Danescu 2009
-    "any", "at all", "give a damn", "gave a damn", "do a thing", "bat an eye",
+    "any", "at all", "give a damn",  "do a thing",  "bat an eye",
+    "giving a damn", "doing a thing", "batting an eye",
+    "gave a damn", "did a thing", "batted an eye",
 
     # col 2
     "in weeks", "in ages", "in years",
     "drink a drop", "last long", "take long", "be long",
     "arrive until", "leave until", "would care", "would mind",
+    "drinking a drop", "lasting long", "taking long", "being long", "arriving until", "leaving until",
+    "drank a drop", "lasted long", "took long", "arrived until", "left until",
 
     # col 3
-    "yet", "budge",
-    "ever",
+    "budge", "red cent", "but what", "give a shit", "eat a bite",
+    "budging", "giving a shit", "eating a bite",
+    "budged", "gave a shit", "ate a bite",
+
+    # col 4
+    "yet", "ever", "bother to", "lift a finger", "to speak of",
+    "bothering to", "lifting a finger",
+    "bothered to", "lifted a finger"
 ]
 
 NPI_en = [" "+npi+" " for npi in NPI_en]
 # NPI_en = [" any "]
 
 # known DE operators in Chinese
-KNOWN_DE_OP_zh = [
-    "没", "没有", "不", "不是", "无", "未", "不管", "不论", "无论", "不知", "不顾",
-    "毫不", "不能", "不得", "绝不", "决不", "不准", "从未",
-]
+KNOWN_DE_OP_zh = ["没", "没有", "不", "不是", "无", "未", "不管", "不论", "无论", "不知", "不顾", "毫不", "不能", "不得", "绝不", "决不", "不准", "从未"]
 
 # KNOWN_DE_OP_zh = []
 
@@ -140,7 +118,9 @@ def main():
     my_counter.NPI_contexts()
 
 
+    # With distillation
     my_counter.compute_Sd()
+    # No distillation
     # my_counter.compute_S()
 
     ## ---------------------
@@ -192,11 +172,11 @@ class NPI_counter(object):
         self.save_context = save_context
         if self.lang == "zh":
             self.NPIs = NPI_zh
-            self.pat_delimieter = pat_delimieter_zh
+            self.pat_delimiter = pat_delimiter_zh
             self.known_DE_op = KNOWN_DE_OP_zh
         else:
             self.NPIs = NPI_en
-            self.pat_delimieter = pat_delimieter_en
+            self.pat_delimiter = pat_delimiter_en
             self.known_DE_op = KNOWN_DE_OP_en
         
         self.S_cache = {}
@@ -247,7 +227,7 @@ class NPI_counter(object):
                 # TODO test different ways of splitting into chunks
                 # maybe not on ，
                 # line_split = ['1998年\t', ',', '\t三峡\t工程\t转入\t二期\t施工\t', '。', '']
-                line_split = self.pat_delimieter.split(line.strip())
+                line_split = self.pat_delimiter.split(line.strip())
 
                 # write in paper
                 # add back the delimiter to remove cases where wh co-occur with wh operators
@@ -290,13 +270,13 @@ class NPI_counter(object):
 
                                 # don't want known DE operators
                                 if not self.whether_known_DE(context):
-                                # if not any([de in context for de in self.known_DE_op]):
-                                    counter += 1
-                                    context_old = context[:]
+                                    if not any([de in context for de in self.known_DE_op]):
+                                        counter += 1
+                                        context_old = context[:]
 
-                                    # remove all npi in the context
-                                    context = self.remove_all_npi(context)
-                                    # context.remove(npi)  # remove npi
+                                        # remove all npi in the context
+                                        context = self.remove_all_npi(context)
+                                        # context.remove(npi)  # remove npi
 
                                     if self.verbose: print(context)
                                     if self.save_context:
@@ -354,10 +334,10 @@ class NPI_counter(object):
         print()
 
         with open(self.fn + ".npi.context", 'w') as f:
-            f.write("potential DE operator\tNPI\tcontext\n")
+            f.write("NPI\tcontext\n")
             for npi in sorted(npi_context_dict.keys()):
                 for context in npi_context_dict[npi]:
-                    f.write("{}\t{}\t{}\n".format("", npi, ' '.join(context)))
+                    f.write("{}\t{}\n".format(npi, ' '.join(context)))
 
 
         # word = "没有"
