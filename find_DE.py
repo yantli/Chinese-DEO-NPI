@@ -76,9 +76,9 @@ NPI_en = [" "+npi+" " for npi in NPI_en]
 # NPI_en = [" any "]
 
 # known DE operators in Chinese
-KNOWN_DE_OP_zh = ["没", "没有", "不", "不是", "无", "未", "不管", "不论", "无论", "不知", "不顾", "毫不", "不能", "不得", "绝不", "决不", "不准", "从未"]
+# KNOWN_DE_OP_zh = ["没", "没有", "不", "不是", "无", "未", "不管", "不论", "无论", "不知", "不顾", "毫不", "不能", "不得", "绝不", "决不", "不准", "从未"]
 
-# KNOWN_DE_OP_zh = []
+KNOWN_DE_OP_zh = []
 
 KNOWN_DE_OP_en = ["not", "n't", "no", "none", "neither", "nor",
                   "few", "each", "every", "without"]
@@ -106,12 +106,7 @@ def main():
             else: verbose = False
             if '-save' in sys.argv: save_context = True
             else: save_context = False
-    # fn = "CTB_seg_split2_all"
-    # fn = "mid.txt"
-    # fn = "test.txt"
-    # fn = "wsj_all_word.txt"
-    # fn = "nyt.small.txt"
-    # lang = "zh"
+     # lang = "zh"
     # lang = "en"
     start_time = time.time()
     my_counter = NPI_counter(fn, lang, verbose, save_context)
@@ -193,7 +188,7 @@ class NPI_counter(object):
         # self.method = 1  # operationalization method in n()
         self.method = 2  # operationalization method in n(). all c in context
         self.thresh_whole = 150  # min freq in allwords
-        self.thresh_context = 10  # min freq in context
+        self.thresh_context = 4  # min freq in context
 
         self.cache_counter = 0  # count num times the cache is accessed
 
@@ -241,9 +236,10 @@ class NPI_counter(object):
                 # print(new_line_split)
 
                 # new_line_split = ['abc','def','ghi',...]
-                # we want: 'abcdef','defghi',  TODO yanting
+                # we want: 'abcdef','defghi'
 
                 for chunk in new_line_split:
+                    #Code on Chinese texts written by Hai
                     if self.lang == "zh":
                         # TODO try different ways of identifying NPIs
                         # for now: trust the segmentation
@@ -276,7 +272,6 @@ class NPI_counter(object):
 
                                         # remove all npi in the context
                                         context = self.remove_all_npi(context)
-                                        # context.remove(npi)  # remove npi
 
                                     if self.verbose: print(context)
                                     if self.save_context:
@@ -297,30 +292,38 @@ class NPI_counter(object):
                                     break
                                     # context = context_old
 
+                    # Code on English texts written by Yanting
                     else:  # lang = "en"
                         words = " " + chunk.lower() + " "  # " in any event "
                         # if NPI in chunk
-                        idx_NPI = self.idx_first_NPI(words)
+                        idx_NPI, mynpi = self.idx_first_NPI(words)
                         if idx_NPI != self.large_num:  # if NPI found
                             context = words[:idx_NPI]
                             context = context.strip().split()
                             # don't want known DE operators
-                            if not any([de in context for de in self.known_DE_op]):
-                                if self.verbose:
-                                    # words  :  and it is best to live without any ties and commitments
-                                    # context: ['and', 'it', 'is', 'best', 'to', 'live', 'without']
-                                    print("\nwords  :", words)
-                                    print("context:", context)  # could be []!
-                                if self.save_context:
-                                    fn_context.write(' '.join(context) + "\n")
+                            if context:
+                                if not any([de in context for de in self.known_DE_op]):
+                                    if self.verbose:
+                                        # words  :  and it is best to live without any ties and commitments
+                                        # context: ['and', 'it', 'is', 'best', 'to', 'live', 'without']
+                                        print("\nwords  :", words)
+                                        print("context:", context)  # could be []!
+                                    if self.save_context:
+                                        fn_context.write(' '.join(context) + "\n")
 
-                                if context:
-                                    counter += 1
-                                    self.words_in_context.extend(context)
-                                    self.context_list.append(tuple(context))
-                                    self.n_words_context += len(context)
-                                    if len(self.context_list) % 1000 == 0:
-                                        print("processed in {:7} contexts".format(len(self.context_list)))
+                                    # save to npi_context_dict
+                                    if mynpi not in npi_context_dict:
+                                        npi_context_dict[mynpi] = [context]
+                                    else:
+                                        npi_context_dict[mynpi].append(context)
+
+                                # if context:
+                                counter += 1
+                                self.words_in_context.extend(context)
+                                self.context_list.append(tuple(context))
+                                self.n_words_context += len(context)
+                                if len(self.context_list) % 1000 == 0:
+                                    print("processed in {:7} contexts".format(len(self.context_list)))
 
         if self.save_context: fn_context.close()
 
@@ -339,10 +342,7 @@ class NPI_counter(object):
                 for context in npi_context_dict[npi]:
                     f.write("{}\t{}\n".format(npi, ' '.join(context)))
 
-
-        # word = "没有"
-        # print(word, self.wc_in_allwords[word], self.wc_in_context[word])
-
+# Calculating Sd: original codes written by Yanting, broken down into functions by Hai.
     def count_npi(self, context):
         # TODO
         ans = 0
@@ -350,9 +350,9 @@ class NPI_counter(object):
 
     def whether_known_DE(self, context):
         """ return False if no known DE operator in context = [谁 都 不能 产生 任何 分裂 国家 的 企图] """
-        for word in context:
-            if any([de in word for de in ['不', '没', '未', '无'] ]):
-                return True
+        # for word in context:
+        #     if any([de in word for de in ['不', '没', '未', '无'] ]):
+                # return True
         return False
 
     def remove_all_npi(self, context):
@@ -369,11 +369,13 @@ class NPI_counter(object):
         return 8
         """
         idx = self.large_num
+        mynpi = None
         for npi in self.NPIs:
             idx_tmp = words.find(npi)
             if idx_tmp != -1 and idx_tmp < idx:
                 idx = idx_tmp
-        return min(idx, self.large_num)
+                mynpi = npi
+        return min(idx, self.large_num), mynpi
 
     def get_S(self, c):
         # w/o cache 1 min 26 s
@@ -387,8 +389,8 @@ class NPI_counter(object):
         Fc = self.wc_in_allwords.get(c) / self.n_allwords
         S = FbyNPIc / Fc
         self.S_cache[c] = S
-        if c in ["没", "没有", "不", "无"]:
-            print(c, S)
+        # if c in ["没", "没有", "不", "无"]:
+        #     print(c, S)
         return S
 
     def compute_S(self):
@@ -411,8 +413,8 @@ class NPI_counter(object):
                 if context in self.n_cache[candidate]:
                     self.cache_counter += 1
                     return self.n_cache[candidate][context]
-            else:
-                self.n_cache[candidate] = {}
+            # else:
+            #     self.n_cache[candidate] = {}
 
             ans = 0
 
@@ -447,7 +449,6 @@ class NPI_counter(object):
         """ compute Sd for all
         frequency boundary here """
         for candidate in self.wc_in_context:
-            # TODO: tune 150, 10
             if self.wc_in_allwords[candidate] < self.thresh_whole: continue
             if self.wc_in_context[candidate] < self.thresh_context: continue
             self.compute_Sd_helper(candidate)
