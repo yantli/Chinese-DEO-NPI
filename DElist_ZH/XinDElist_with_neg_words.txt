@@ -1,0 +1,61 @@
+1	放过		let go
+2	不顾		do not care about		
+3	毫不		not slightly
+4	低迷		inactive
+5	谷底		valley bottom
+6	松懈		slaken
+7	无权		have no right
+8	可言		
+9	决不会		will absolutely not
+10	阻挡		prevent
+11	不会		will not
+12	没有		none
+13	看不到		cannot see
+14	不予		do not give
+15	不得		cannot
+16	逊色		worse
+17	让步		give in
+18	悬而未决	undecided	
+19	任何人		anyone
+20	图谋		plot
+21	加强		strengthen
+22	先决条件	precondition
+23	从未		never
+24	角落		corner
+25	房地产业	real eastate industry
+26	严禁		forbid
+27	决不		absolutely not
+28	犹豫		hesitate
+29	附加		additional
+30	绝不		absolutely not
+31	借口		excuse
+32	时候		time
+33	悬念		
+34	场合		situation		
+35	以往		previous
+36	不准		not allowed
+37	未		not
+38	没		none/not
+39	实质性		substantive
+40	截留		
+41	不要		do not want
+42	不必		no need
+43	动摇		shake/hesitate
+44	事情		thing
+45	迹象		sign
+46	理由		reason
+47	禁止		forbid
+48	异议		disagreement
+49	容许		allow
+50	不能		cannot
+51	屈服		surrender
+52	否认		deny
+53	无意		no intention
+54	言行		words and deeds
+55	余地		leeway
+56	尚未		not yet
+57	企图		(bad) attempt
+58	干涉		interfere
+59	决不能		absolutely cannot
+60	即可		fine(?)
+
