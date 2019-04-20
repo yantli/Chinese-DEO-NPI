@@ -1,0 +1,61 @@
+1	低迷		inactive
+2	谷底		valley bottom		
+3	角落		corner
+4	严禁		forbid
+5	房地产业	real estate industry
+6	图谋		plot
+7	时候		when
+8	否认		deny
+9	拒绝		refuse
+10	任何人		anyone
+11	以往		before
+12	战术		tactics
+13	事情		thing
+14	禁止		forbid
+15	权		power
+16	地点		venue
+17	反对		oppose
+18	企图		attempt(neg)
+19	粉碎		smash
+20	即可		fine(?)
+21	足以		enough
+22	言行		words and deeds
+23	应付		deal with
+24	挫败		defeat
+25	随时		anytime
+26	差		lack
+27	借口		excuse
+28	挑衅		provoke
+29	形式		format
+30	方		side
+31	只要		as long as
+32	回升		pick up
+33	可疑		suspicious
+34	都		
+35	复苏		recover
+36	愿意		willing
+37	单方面		unilateral
+38	干涉		interfere
+39	对付		deal with
+40	分裂		divide
+41	岛内		inside the island
+42	恐怖主义	terrorism
+43	举动		behavior
+44	就是		that is
+45	政党		political party
+46	衰退		decline
+47	武力		military power
+48	坚决		determined
+49	谴责		condemn
+50	指标		benchmark
+51	可以		can
+52	违反		violate
+53	萨达姆		Saddam
+54	阻止		prevent
+55	国际法		international law
+56	违背		violate
+57	个人		personal
+58	恶化		worsen
+59	避免		avoid
+60	核武器		nuclear weapon
+
