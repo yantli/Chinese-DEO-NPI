@@ -23,9 +23,7 @@ k = n_all / n_byNPI
 从来      1           14       1/14         1          26     1/26       1 * k
 小红      0           14       0/14         1          26     1/26        0
 
-TODO:
-
-larger sentence chunks.
+TODO: larger sentence chunks.
 
 
 """
@@ -45,7 +43,6 @@ pat_delimiter_en = re.compile("(\s;\s|\s\.\s|\s,\s|\s!\s|\s\?\s)")
 from zh_NPIs import NPI_zh
 
 WH_zh = {"什么", "谁", "哪儿", "哪里", "哪个", "怎么", "多少"}
-
 WH_OP_zh = {"吗", "呢", "？", "?"}
 
 NPI_en = [
@@ -53,6 +50,8 @@ NPI_en = [
     "any", "at all", "give a damn",  "do a thing",  "bat an eye",
     "giving a damn", "doing a thing", "batting an eye",
     "gave a damn", "did a thing", "batted an eye",
+    "given a damn", "done a thing",
+    "gives a damn", "does a thing", "bats an eye",
 
     # col 2
     "in weeks", "in ages", "in years",
@@ -60,25 +59,35 @@ NPI_en = [
     "arrive until", "leave until", "would care", "would mind",
     "drinking a drop", "lasting long", "taking long", "being long", "arriving until", "leaving until",
     "drank a drop", "lasted long", "took long", "arrived until", "left until",
+    "drunk a drop", "taken long",
+    "drinks a drop", "lasts long", "takes along",
 
     # col 3
     "budge", "red cent", "but what", "give a shit", "eat a bite",
     "budging", "giving a shit", "eating a bite",
     "budged", "gave a shit", "ate a bite",
+    "given a shit", "eaten a bite",
+    "budges", "gives a shit", "eats a bite",
 
     # col 4
     "yet", "ever", "bother to", "lift a finger", "to speak of",
     "bothering to", "lifting a finger",
-    "bothered to", "lifted a finger"
+    "bothered to", "lifted a finger",
+    "bothers to", "lifts a finger"
 ]
 
 NPI_en = [" "+npi+" " for npi in NPI_en]
 # NPI_en = [" any "]
 
-# known DE operators in Chinese
-# KNOWN_DE_OP_zh = ["没", "没有", "不", "不是", "无", "未", "不管", "不论", "无论", "不知", "不顾", "毫不", "不能", "不得", "绝不", "决不", "不准", "从未"]
 
-KNOWN_DE_OP_zh = []
+# pNPI_zh = ["任何", "手软", "尽如人意", "间断", "辜负", "断", "振", "非但", "幸", "拒", "迟迟", "逾期", "丝毫", "放过", "想到",
+#           "例外", "建树", "畅", "多久", "利于", "敌", "逊色", "够", "少于", "可言"
+#            ]
+
+# known DE operators in Chinese
+KNOWN_DE_OP_zh = ["没", "没有", "不", "不是", "无", "未", "不管", "不论", "无论", "不知", "不顾", "毫不", "不能", "不得", "绝不", "决不", "不准", "从未"]
+
+#KNOWN_DE_OP_zh = []
 
 KNOWN_DE_OP_en = ["not", "n't", "no", "none", "neither", "nor",
                   "few", "each", "every", "without"]
@@ -135,7 +144,7 @@ def main():
     # print("\nn1=", n1)
     # print("\n=?", my_counter.n_cache[tuple(my_context)])
 
-    # so S(c) and n(c) are correctly calcualted!!
+    # so S(c) and n(c) are correctly calculated!!
 
     ## ---------------------
     ## end: sanity check
@@ -185,10 +194,10 @@ class NPI_counter(object):
         self.context_list = []  # a list of tuples, each tuple a context
         self.words_in_context = []  # all tokens in context
 
-        # self.method = 1  # operationalization method in n()
-        self.method = 2  # operationalization method in n(). all c in context
-        self.thresh_whole = 150  # min freq in allwords
-        self.thresh_context = 4  # min freq in context
+        self.method = 1  # operationalization method in n()
+#        self.method = 2  # operationalization method in n(). all c in context
+        self.thresh_whole = 100  # min freq in allwords
+        self.thresh_context = 10  # min freq in context
 
         self.cache_counter = 0  # count num times the cache is accessed
 
@@ -231,9 +240,6 @@ class NPI_counter(object):
                 while idx < len(line_split) - 1:
                     new_line_split.append(line_split[idx] + line_split[idx+1])
                     idx += 2
-                # print()
-                # print(line_split)
-                # print(new_line_split)
 
                 # new_line_split = ['abc','def','ghi',...]
                 # we want: 'abcdef','defghi'
@@ -260,18 +266,18 @@ class NPI_counter(object):
                         for npi in self.NPIs:
                             if npi in context:
                                 # don't want wh + wh operators, e.g. 什么 + 吗
-                                if npi in WH_zh:
-                                    if any([op in context for op in WH_OP_zh]):
-                                        continue
+                                # if npi in WH_zh:
+                                #     if any([op in context for op in WH_OP_zh]):
+                                #         continue
 
                                 # don't want known DE operators
                                 if not self.whether_known_DE(context):
-                                    if not any([de in context for de in self.known_DE_op]):
-                                        counter += 1
-                                        context_old = context[:]
+                                # if not any([de in context for de in self.known_DE_op]):
+                                    counter += 1
+                                    context_old = context[:]
 
                                         # remove all npi in the context
-                                        context = self.remove_all_npi(context)
+                                    context = self.remove_all_npi(context)
 
                                     if self.verbose: print(context)
                                     if self.save_context:
@@ -302,12 +308,12 @@ class NPI_counter(object):
                             context = context.strip().split()
                             # don't want known DE operators
                             if context:
-                                if not any([de in context for de in self.known_DE_op]):
+                                if not any([de in context for de in self.known_DE_op]) and context != ["``"] and context != ["''"]:
                                     if self.verbose:
                                         # words  :  and it is best to live without any ties and commitments
                                         # context: ['and', 'it', 'is', 'best', 'to', 'live', 'without']
                                         print("\nwords  :", words)
-                                        print("context:", context)  # could be []!
+                                        print("context:", context)
                                     if self.save_context:
                                         fn_context.write(' '.join(context) + "\n")
 
@@ -318,12 +324,12 @@ class NPI_counter(object):
                                         npi_context_dict[mynpi].append(context)
 
                                 # if context:
-                                counter += 1
-                                self.words_in_context.extend(context)
-                                self.context_list.append(tuple(context))
-                                self.n_words_context += len(context)
-                                if len(self.context_list) % 1000 == 0:
-                                    print("processed in {:7} contexts".format(len(self.context_list)))
+                                    counter += 1
+                                    self.words_in_context.extend(context)
+                                    self.context_list.append(tuple(context))
+                                    self.n_words_context += len(context)
+                                    if len(self.context_list) % 1000 == 0:
+                                        print("processed in {:7} contexts".format(len(self.context_list)))
 
         if self.save_context: fn_context.close()
 
@@ -350,9 +356,9 @@ class NPI_counter(object):
 
     def whether_known_DE(self, context):
         """ return False if no known DE operator in context = [谁 都 不能 产生 任何 分裂 国家 的 企图] """
-        # for word in context:
-        #     if any([de in word for de in ['不', '没', '未', '无'] ]):
-                # return True
+        for word in context:
+            if any([de in word for de in ['不', '没', '未', '无'] ]):
+                return True
         return False
 
     def remove_all_npi(self, context):
@@ -386,11 +392,12 @@ class NPI_counter(object):
         FbyNPIc = self.wc_in_context.get(c) / self.n_words_context
         if self.wc_in_allwords.get(c) is None:
             print(c)
+            self.wc_in_allwords[c] = 1
         Fc = self.wc_in_allwords.get(c) / self.n_allwords
         S = FbyNPIc / Fc
         self.S_cache[c] = S
-        # if c in ["没", "没有", "不", "无"]:
-        #     print(c, S)
+        if c in ["没", "没有", "不", "无"]:
+            print(c, S)
         return S
 
     def compute_S(self):
@@ -404,33 +411,35 @@ class NPI_counter(object):
     def get_n(self, context, candidate):
         # ---------------------
         # operationalization 1:
-        # context = [we, don't, have, plans]
-        # candidate = don't
-        # n = S(we) + S(have) + S(plans)
+        # context = [we, do, not, have, plans]
+        # candidate = not
+        # n = S(we) + S(do) + S(have) + S(plans)
         if self.method == 1:
             # check cache
             if candidate in self.n_cache:
                 if context in self.n_cache[candidate]:
                     self.cache_counter += 1
                     return self.n_cache[candidate][context]
-            # else:
-            #     self.n_cache[candidate] = {}
+            else:
+                self.n_cache[candidate] = {}
 
             ans = 0
 
             piggys = set(context)  # convert context to set
             piggys.remove(candidate)
-            for p in piggys:
-                ans += self.get_S(p)
-
+            if piggys:
+                for p in piggys:
+                    ans += self.get_S(p)
+            else:
+                ans = self.get_S(candidate)
             self.n_cache[candidate][context] = ans
             return ans
 
         # ---------------------
         # operationalization 2:
-        # context = [we, don't, have, plans]
-        # candidate = don't
-        # n = S(we) + S(don't) + S(have) + S(plans)
+        # context = [we, do, not, have, plans]
+        # candidate = not
+        # n = S(we) + S(do) + S(not) + S(have) + S(plans)
         else:
             # check cache
             if context in self.n_cache:
