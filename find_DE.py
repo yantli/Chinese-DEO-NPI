@@ -35,6 +35,8 @@ from collections import Counter
 
 DELIMITER_zh = ["，", "；", "！", "？", ",", ";", "!", "?", "。"]
 pat_delimiter_zh = re.compile('([{}])'.format(''.join([d for d in DELIMITER_zh])))
+DELIMITER_zh_nocomma = ["；", "！", "？", ";", "!", "?", "。"]
+pat_delimiter_zh_nocomma = re.compile('([{}])'.format(''.join([d for d in DELIMITER_zh_nocomma])))
 
 DELIMITER_en = ["\s;\s", "\s.\s", "\s,\s", "\s!\s", "\s?\s"]
 pat_delimiter_en = re.compile("(\s;\s|\s\.\s|\s,\s|\s!\s|\s\?\s)")
@@ -176,7 +178,8 @@ class NPI_counter(object):
         self.save_context = save_context
         if self.lang == "zh":
             self.NPIs = NPI_zh
-            self.pat_delimiter = pat_delimiter_zh
+            # self.pat_delimiter = pat_delimiter_zh
+            self.pat_delimiter = pat_delimiter_zh_nocomma
             self.known_DE_op = KNOWN_DE_OP_zh
         else:
             self.NPIs = NPI_en
@@ -230,6 +233,7 @@ class NPI_counter(object):
             for line in f:
                 # TODO test different ways of splitting into chunks
                 # maybe not on ，
+
                 # line_split = ['1998年\t', ',', '\t三峡\t工程\t转入\t二期\t施工\t', '。', '']
                 line_split = self.pat_delimiter.split(line.strip())
 
