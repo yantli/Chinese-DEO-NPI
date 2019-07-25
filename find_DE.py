@@ -474,6 +474,7 @@ class NPI_counter(object):
                 # print(context)
                 numerator += self.get_S(candidate) / self.get_n(context, candidate)
         self.Sd_cache[candidate] = numerator / self.get_N(candidate)
+        # denominator is wrong! SHould be: num of contexts that contain candidate
 
     def get_N(self, candidate):
         return self.wc_in_context.get(candidate)
